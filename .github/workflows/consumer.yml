@@ -1,0 +1,19 @@
+name: Anonymous public SwiftPM consumer
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  consumer:
+    if: vars.EXPERIMENTAL_PACKAGES_AVAILABLE == 'true'
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+      - run: python3 scripts/dependencies.py
+      - name: Verify selected package versions and iOS build
+        run: python3 scripts/verify.py --ios | tee consumer-result.json

@@ -29,6 +29,7 @@ def verify(root=ROOT, local_remotes=None, ios=False):
             env[f'GIT_CONFIG_KEY_{index}'] = f'url.{mirror}.insteadOf'
             env[f'GIT_CONFIG_VALUE_{index}'] = d['url']
         env['GIT_CONFIG_COUNT'] = str(len(deps) + 1)
+        env['SWIFTPM_MIRROR_CONFIG'] = str(root / '.swiftpm/configuration/mirrors.json')
     elif (root / '.swiftpm/configuration/mirrors.json').exists():
         raise ValueError('Remove local mirrors before anonymous public validation')
     with tempfile.TemporaryDirectory(prefix='swift-consumer-state-') as temp:
@@ -52,6 +53,8 @@ def verify(root=ROOT, local_remotes=None, ios=False):
                           '-configuration', 'Debug', '-sdk', 'iphonesimulator',
                           '-destination', 'generic/platform=iOS Simulator',
                           '-derivedDataPath', root/'DerivedData', '-clonedSourcePackagesDirPath', state/'xcode-packages',
+                          '-packageCachePath', state/'xcode-cache', '-disablePackageRepositoryCache',
+                          '-packageFingerprintPolicy', 'strict',
                           '-scmProvider', 'system', 'CODE_SIGNING_ALLOWED=NO', 'build'])
             if '** BUILD SUCCEEDED **' not in output:
                 raise ValueError('Xcode did not report a successful build')

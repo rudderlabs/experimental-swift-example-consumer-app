@@ -28,7 +28,7 @@ struct DemoView: View {
                     Text(DemoSDK.hasPrivacyManifest() ? "Privacy manifest loaded" : "Privacy manifest missing")
                 }
                 Text("Temporary unsupported publication experiment. No events leave this app.")
-            }.navigationTitle("SwiftPM Publication Lab").onAppear { check() }
+            }.navigationTitle("Publication Lab").onAppear { check() }
         }
     }
     private func check() {

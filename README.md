@@ -17,3 +17,8 @@ For the local rehearsal, use `scripts/verify.py --local-remotes <absolute-path>`
 Local mirrors change transport only. The manifests retain the planned public URLs.
 Keep local mirror configuration and locally generated lockfiles out of remote commits.
 After remote publication, commit the clean public `Package.resolved` with an application upgrade.
+
+## Branch
+
+Use `dev` for consumer changes and CI. Set the GitHub default branch to `dev` so the manual consumer workflow is available.
+Package versions still come from semantic version tags; the app does not depend on a package branch.

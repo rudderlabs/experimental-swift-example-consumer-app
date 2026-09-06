@@ -16,4 +16,12 @@ jobs:
           persist-credentials: false
       - run: python3 scripts/dependencies.py
       - name: Verify selected package versions and iOS build
-        run: python3 scripts/verify.py --ios | tee consumer-result.json
+        run: python3 scripts/verify.py --ios | tee "$RUNNER_TEMP/consumer-result.json"
+      - name: Retain consumer evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: consumer-evidence
+          path: |
+            ${{ runner.temp }}/consumer-result.json
+            Package.resolved
+            PublicationDemo.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved

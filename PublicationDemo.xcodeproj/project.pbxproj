@@ -1,12 +1,12 @@
 // !$*UTF8*$!
 { archiveVersion = 1; classes = {}; objectVersion = 60; objects = {
-000000000000000000000064 = { isa = XCRemoteSwiftPackageReference; repositoryURL = "https://github.com/rudderlabs/experimental-rudder-sdk-swift-spm-test.git"; requirement = { kind = exactVersion; version = 0.1.0; }; };
+000000000000000000000064 = { isa = XCRemoteSwiftPackageReference; repositoryURL = "https://github.com/rudderlabs/experimental-rudder-sdk-swift.git"; requirement = { kind = exactVersion; version = 0.1.0; }; };
 0000000000000000000000C8 = { isa = XCSwiftPackageProductDependency; package = 000000000000000000000064; productName = DemoSDK; };
 00000000000000000000012C = { isa = PBXBuildFile; productRef = 0000000000000000000000C8; };
-000000000000000000000065 = { isa = XCRemoteSwiftPackageReference; repositoryURL = "https://github.com/rudderlabs/experimental-integration-swift-sprig-spm-test.git"; requirement = { kind = exactVersion; version = 0.1.0; }; };
+000000000000000000000065 = { isa = XCRemoteSwiftPackageReference; repositoryURL = "https://github.com/rudderlabs/experimental-integration-swift-sprig.git"; requirement = { kind = exactVersion; version = 0.1.0; }; };
 0000000000000000000000C9 = { isa = XCSwiftPackageProductDependency; package = 000000000000000000000065; productName = DemoSprig; };
 00000000000000000000012D = { isa = PBXBuildFile; productRef = 0000000000000000000000C9; };
-000000000000000000000066 = { isa = XCRemoteSwiftPackageReference; repositoryURL = "https://github.com/rudderlabs/experimental-integration-swift-firebase-spm-test.git"; requirement = { kind = exactVersion; version = 0.1.0; }; };
+000000000000000000000066 = { isa = XCRemoteSwiftPackageReference; repositoryURL = "https://github.com/rudderlabs/experimental-integration-swift-firebase.git"; requirement = { kind = exactVersion; version = 0.1.0; }; };
 0000000000000000000000CA = { isa = XCSwiftPackageProductDependency; package = 000000000000000000000066; productName = DemoFirebase; };
 00000000000000000000012E = { isa = PBXBuildFile; productRef = 0000000000000000000000CA; };
 000000000000000000000001 = { isa = PBXProject; attributes = { LastUpgradeCheck = 2600; }; buildConfigurationList = 00000000000000000000000A; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; knownRegions = (en, Base); mainGroup = 000000000000000000000002; productRefGroup = 000000000000000000000003; projectDirPath = ""; projectRoot = ""; targets = (000000000000000000000004); packageReferences = (000000000000000000000064, 000000000000000000000065, 000000000000000000000066); };

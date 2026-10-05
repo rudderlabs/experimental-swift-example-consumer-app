@@ -20,5 +20,5 @@ After remote publication, commit the clean public `Package.resolved` with an app
 
 ## Branch
 
-Use `dev` for consumer changes and CI. Set the GitHub default branch to `dev` so the manual consumer workflow is available.
+Use default `main` for consumer changes and CI. Subsequent updates require reviewed PRs.
 Package versions still come from semantic version tags; the app does not depend on a package branch.

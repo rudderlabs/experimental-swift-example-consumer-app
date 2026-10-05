@@ -1,16 +1,16 @@
 {
   "sdk": {
-    "url": "https://github.com/rudderlabs/experimental-rudder-sdk-swift-spm-test.git",
+    "url": "https://github.com/rudderlabs/experimental-rudder-sdk-swift.git",
     "product": "DemoSDK",
     "version": "0.1.0"
   },
   "sprig": {
-    "url": "https://github.com/rudderlabs/experimental-integration-swift-sprig-spm-test.git",
+    "url": "https://github.com/rudderlabs/experimental-integration-swift-sprig.git",
     "product": "DemoSprig",
     "version": "0.1.0"
   },
   "firebase": {
-    "url": "https://github.com/rudderlabs/experimental-integration-swift-firebase-spm-test.git",
+    "url": "https://github.com/rudderlabs/experimental-integration-swift-firebase.git",
     "product": "DemoFirebase",
     "version": "0.1.0"
   }

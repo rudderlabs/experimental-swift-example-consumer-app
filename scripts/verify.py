@@ -46,8 +46,9 @@ def verify(root=ROOT, local_remotes=None, ios=False):
         for dep in deps.values():
             name = dep['url'].rsplit('/', 1)[1].removesuffix('.git')
             pin = next(p for p in pins['pins'] if p['identity'] == name)
-            if pin['state']['version'] != dep['version']:
-                raise ValueError(f'Resolver selected the wrong version for {name}')
+            field = 'branch' if 'branch' in dep else 'version'
+            if pin['state'].get(field) != dep[field]:
+                raise ValueError(f'Resolver selected the wrong {field} for {name}')
         if ios:
             output = run(['xcodebuild', '-project', 'PublicationDemo.xcodeproj', '-scheme', 'PublicationDemo',
                           '-configuration', 'Debug', '-sdk', 'iphonesimulator',

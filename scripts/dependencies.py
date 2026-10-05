@@ -7,7 +7,7 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def render(root=ROOT, updates=()):
+def render(root=ROOT, updates=(), branches=()):
     path = root / "dependencies.json"
     dependencies = json.loads(path.read_text())
     for update in updates:
@@ -15,11 +15,17 @@ def render(root=ROOT, updates=()):
         if key not in dependencies or not re.fullmatch(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)", version):
             raise ValueError("Expected sdk=X.Y.Z, sprig=X.Y.Z, or firebase=X.Y.Z")
         dependencies[key]["version"] = version
+    for selection in branches:
+        key, branch = selection.split("=", 1)
+        if key not in dependencies or branch not in ("main", "develop"):
+            raise ValueError("Branch compatibility tests accept a package key and main or develop")
+        dependencies[key]["branch"] = branch
     path.write_text(json.dumps(dependencies, indent=2) + "\n")
     specs, products = [], []
     for d in dependencies.values():
         identity = d['url'].rsplit('/', 1)[1].removesuffix('.git')
-        specs.append(f'.package(url: "{d["url"]}", exact: "{d["version"]}")')
+        requirement = f'branch: "{d["branch"]}"' if "branch" in d else f'exact: "{d["version"]}"'
+        specs.append(f'.package(url: "{d["url"]}", {requirement})')
         products.append(f'.product(name: "{d["product"]}", package: "{identity}")')
     (root / "Package.swift").write_text(f'''// swift-tools-version: 5.9
 import PackageDescription
@@ -39,7 +45,8 @@ let package = Package(
     for index, d in enumerate(dependencies.values()):
         ref, prod, build = 100 + index, 200 + index, 300 + index
         refs.append(uid(ref)); prods.append(uid(prod)); builds.append(uid(build))
-        obj(ref, f'isa = XCRemoteSwiftPackageReference; repositoryURL = "{d["url"]}"; requirement = {{ kind = exactVersion; version = {d["version"]}; }};')
+        requirement = f'kind = branch; branch = {d["branch"]};' if "branch" in d else f'kind = exactVersion; version = {d["version"]};'
+        obj(ref, f'isa = XCRemoteSwiftPackageReference; repositoryURL = "{d["url"]}"; requirement = {{ {requirement} }};')
         obj(prod, f'isa = XCSwiftPackageProductDependency; package = {uid(ref)}; productName = {d["product"]};')
         obj(build, f'isa = PBXBuildFile; productRef = {uid(prod)};')
     obj(1, f'isa = PBXProject; attributes = {{ LastUpgradeCheck = 2600; }}; buildConfigurationList = {uid(10)}; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; knownRegions = (en, Base); mainGroup = {uid(2)}; productRefGroup = {uid(3)}; projectDirPath = ""; projectRoot = ""; targets = ({uid(4)}); packageReferences = ({", ".join(refs)});')
@@ -81,5 +88,6 @@ let package = Package(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--set", action="append", default=[])
+    parser.add_argument("--branch", action="append", default=[])
     args = parser.parse_args()
-    render(updates=args.set)
+    render(updates=args.set, branches=args.branch)

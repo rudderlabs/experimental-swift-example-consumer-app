@@ -22,3 +22,16 @@ After remote publication, commit the clean public `Package.resolved` with an app
 
 Use default `main` for consumer changes and CI. Subsequent updates require reviewed PRs.
 Package versions still come from semantic version tags; the app does not depend on a package branch.
+
+## Branch compatibility checks
+
+Normal consumer configuration uses exact package versions. Branch requirements are an opt-in migration test in disposable copies, not the recommended installation mode.
+
+```sh
+python3 scripts/dependencies.py --set sprig=0.1.1 --branch sprig=main
+python3 scripts/verify.py
+```
+
+The version field is the expected runtime version; the branch field selects the Git branch to resolve. The verifier checks both the runtime version and the branch recorded in Package.resolved. A frozen develop fixture uses `--set sprig=0.1.0 --branch sprig=develop`. Both SwiftPM and Xcode manifests use the same selected requirement.
+
+The source rehearsal exercises these selections locally. Hosted public branch checks remain separate acceptance evidence.

@@ -1,22 +1,22 @@
 import Foundation
-import DemoSDK
-import DemoSprig
-import DemoFirebase
+import RudderStackAnalytics
+import RudderIntegrationFirebase
 
-let sprig = DemoSprig.track("  Demo   Event ")
-let firebase = DemoFirebase.track([" Demo Event ", "demo event"])
-precondition(sprig.name == "demo event")
-precondition(firebase.count == 1 && firebase[0].name == "demo event")
-precondition(DemoSDK.hasPrivacyManifest())
-let resource = try DemoSDK.resourceMessage()
-precondition(resource == "standalone resource loaded")
+// Sprig is iOS only, so this macOS CLI links the SDK and Firebase; the iOS app links all three.
+// Dummy write key and unroutable URLs: no credentials are needed and no events leave this process.
+// FirebaseApp.configure() is not called because it needs a GoogleService-Info.plist.
+let configuration = Configuration(writeKey: "consumer-demo-write-key",
+                                  dataPlaneUrl: "https://data-plane.invalid",
+                                  controlPlaneUrl: "https://control-plane.invalid",
+                                  trackApplicationLifecycleEvents: false)
+let analytics = Analytics(configuration: configuration)
+let firebase = FirebaseIntegration()
+analytics.add(plugin: firebase)
+analytics.shutdown()
+
+// Versions are checked from Package.resolved pins (the SDKs keep version constants internal).
 let result: [String: Any] = [
-    "sdk": DemoSDKVersion.current,
-    "sprig": DemoSprigVersion.current,
-    "firebase": DemoFirebaseVersion.current,
-    "event": sprig.name,
-    "vendorDeduplicatedCount": firebase.count,
-    "resource": resource,
-    "privacyManifest": true
+    "analytics": "configured",
+    "integrations": [firebase.key]
 ]
 print(String(data: try JSONSerialization.data(withJSONObject: result, options: [.sortedKeys]), encoding: .utf8)!)

@@ -9,6 +9,19 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def check_pins(lockfile, deps):
+    """The SDKs keep their version constants internal, so the resolved pins are the version evidence."""
+    pins = {p['identity']: p for p in json.loads(lockfile.read_text())['pins']}
+    selected = {}
+    for key, dep in deps.items():
+        name = dep['url'].rsplit('/', 1)[1].removesuffix('.git')
+        field = 'branch' if 'branch' in dep else 'version'
+        if name not in pins or pins[name]['state'].get(field) != dep[field]:
+            raise ValueError(f'Resolver selected the wrong {field} for {name} in {lockfile}')
+        selected[key] = pins[name]
+    return selected
+
+
 def verify(root=ROOT, local_remotes=None, ios=False):
     env = {k: v for k, v in os.environ.items() if k not in
            ('GH_TOKEN', 'GITHUB_TOKEN', 'GIT_ASKPASS', 'SSH_ASKPASS') and not k.startswith('GIT_CONFIG')}
@@ -39,16 +52,11 @@ def verify(root=ROOT, local_remotes=None, ios=False):
                  '--disable-dependency-cache', '--disable-keychain', '--disable-netrc']
         output = run(['swift', 'run', *flags, 'ConsumerDemo'])
         result = json.loads(output.strip().splitlines()[-1])
-        for key, dep in deps.items():
-            if result[key] != dep['version']:
-                raise ValueError(f'Runtime version differs for {key}')
-        pins = json.loads((root/'Package.resolved').read_text())
-        for dep in deps.values():
-            name = dep['url'].rsplit('/', 1)[1].removesuffix('.git')
-            pin = next(p for p in pins['pins'] if p['identity'] == name)
-            field = 'branch' if 'branch' in dep else 'version'
-            if pin['state'].get(field) != dep[field]:
-                raise ValueError(f'Resolver selected the wrong {field} for {name}')
+        if result.get('analytics') != 'configured':
+            raise ValueError('The macOS consumer did not configure Analytics')
+        pins = check_pins(root/'Package.resolved', deps)
+        resolved = json.loads((root/'Package.resolved').read_text())
+        result.update({key: pin['state'].get('version') or pin['state']['revision'] for key, pin in pins.items()})
         if ios:
             output = run(['xcodebuild', '-project', 'PublicationDemo.xcodeproj', '-scheme', 'PublicationDemo',
                           '-configuration', 'Debug', '-sdk', 'iphonesimulator',
@@ -59,8 +67,9 @@ def verify(root=ROOT, local_remotes=None, ios=False):
                           '-scmProvider', 'system', 'CODE_SIGNING_ALLOWED=NO', 'build'])
             if '** BUILD SUCCEEDED **' not in output:
                 raise ValueError('Xcode did not report a successful build')
+            check_pins(root/'PublicationDemo.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved', deps)
             result['iOSSimulatorBuild'] = 'passed'
-    return {'runtime': result, 'resolved': pins,
+    return {'runtime': result, 'resolved': resolved,
             'transport': 'local-git-mirrors' if local_remotes else 'anonymous-public-git'}
 
 

@@ -26,7 +26,9 @@ def render(root=ROOT, updates=(), branches=()):
         identity = d['url'].rsplit('/', 1)[1].removesuffix('.git')
         requirement = f'branch: "{d["branch"]}"' if "branch" in d else f'exact: "{d["version"]}"'
         specs.append(f'.package(url: "{d["url"]}", {requirement})')
-        products.append(f'.product(name: "{d["product"]}", package: "{identity}")')
+        # A package limited to some platforms (Sprig is iOS only) stays resolved but links only there.
+        condition = f', condition: .when(platforms: [{", ".join("." + p for p in d["platforms"])}])' if "platforms" in d else ''
+        products.append(f'.product(name: "{d["product"]}", package: "{identity}"{condition})')
     (root / "Package.swift").write_text(f'''// swift-tools-version: 5.9
 import PackageDescription
 let package = Package(

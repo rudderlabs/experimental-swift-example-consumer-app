@@ -5,21 +5,27 @@ on:
     branches: [main]
   push:
     branches: [main]
-permissions:
-  contents: read
+permissions: {}
 jobs:
   consumer:
     if: vars.EXPERIMENTAL_PACKAGES_AVAILABLE == 'true'
     runs-on: macos-15
+    permissions:
+      contents: read # actions/checkout
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           persist-credentials: false
       - run: python3 scripts/dependencies.py
       - name: Verify selected package versions and iOS build
         run: python3 scripts/verify.py --ios | tee "$RUNNER_TEMP/consumer-result.json"
       - name: Retain consumer evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: consumer-evidence
           path: |
